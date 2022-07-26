@@ -1,0 +1,137 @@
+﻿<Window x:Class="BankSystem.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:BankSystem"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="450" Width="800"
+        WindowStartupLocation="CenterScreen">
+    
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="2*"/>
+            <RowDefinition Height="1*"/>
+        </Grid.RowDefinitions>
+
+
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="2*"/>
+                <ColumnDefinition Width="1*"/>
+            </Grid.ColumnDefinitions>
+            <DataGrid x:Name="PhisicalTable" SelectionChanged="InfoTable_SelectionChanged" AutoGenerateColumns="False" ColumnWidth="*" Grid.Column="0" BeginningEdit="PhisicalTable_BeginningEdit" KeyDown="PhisicalTable_KeyDown" >
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Имя" Binding ="{Binding Name}"  />
+                    <DataGridTextColumn Header="Фамилия" Binding ="{Binding Surname}"/>
+                    <DataGridTextColumn Header="Возраст" Binding ="{Binding Age}"/>
+                    <DataGridTextColumn Header="Телефон" Binding ="{Binding Phone}" />
+                </DataGrid.Columns>
+                <DataGrid.RowStyle>
+                    <Style TargetType="DataGridRow">
+                        <EventSetter Event="MouseLeftButtonDown" Handler="Account_MouseDown"/>
+                    </Style>
+                </DataGrid.RowStyle>
+                
+
+            </DataGrid>
+            <DataGrid x:Name="PhisicalAccountTable" IsReadOnly="True" AutoGenerateColumns="False" ColumnWidth="*" Grid.Column="2" SelectionChanged="AccountTable_SelectionChanged">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Width="3*" Header="Номер" Binding ="{Binding Number}"  />
+                    <DataGridTextColumn Width="2*" Header="Баланс" Binding ="{Binding Amount}"/>
+                    <DataGridTextColumn Width="2*" Header="Тип" Binding ="{Binding AccountType}"/>
+
+                </DataGrid.Columns>
+                <DataGrid.RowStyle>
+                    <Style TargetType="DataGridRow">
+                        <EventSetter Event="MouseLeftButtonDown" Handler="DataGridRow_MouseDown"/>
+                    </Style>
+                </DataGrid.RowStyle>
+
+            </DataGrid>
+
+        </Grid>
+
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="2*"/>
+                <ColumnDefinition Width="1*"/>
+
+            </Grid.ColumnDefinitions>
+            <Border BorderBrush="Black" BorderThickness="1">
+                
+            
+            <StackPanel Grid.Row="1" Grid.Column="0" Orientation="Horizontal" >
+                <ComboBox Margin="7" 
+                          Name="MainClientTypeList" 
+                          Height="25" Width="120" 
+                          SelectionChanged="MainClientTypeList_SelectionChanged">
+                    <ComboBoxItem Content="Физ. лицо" Name="Phisical"></ComboBoxItem>
+                    <ComboBoxItem Content="Вип клиент" Name="Vip"></ComboBoxItem>
+                    <ComboBoxItem Content="Юр. лицо" Name="Legal"></ComboBoxItem>
+
+                </ComboBox>
+                <Button Content="Добавить клиента"
+                    Name="AddClientBtn"
+                    Height="30" Width="108" 
+                    Click="Button_Click" 
+                    Margin="7" Grid.Column="0" />
+                <Button Content="Сохранить изменения" 
+                    Name="SaveBtn"
+                    IsEnabled="False"
+                    Height="30" Width="125" 
+                    Margin="7" 
+                    Click="Save_Click" />
+                <Button Content="Удалить клиента" 
+                    Name="DeleteBtn"
+                    IsEnabled="False"
+                    Height="30" Width="108" 
+                    Margin="7" 
+                    Click="Button_Click_1" />
+                
+                
+            </StackPanel>
+            </Border>
+            <Grid Grid.Column="1">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="1*"/>
+                    <ColumnDefinition Width="1*"/>
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Row="1" Grid.Column="0">
+
+                    <Button Content="Открыть счет" 
+                        Name="OpenAccBtn"
+                        Height="30" Width="108" 
+                        Click="Bill_Click" 
+                        Margin="10,5" 
+                        IsEnabled="False"/>
+                    <Button Content="Удалить счет" 
+                        Name="DeleteAccBtn"
+                        Height="30" Width="108" 
+                        Click="DelAcc_Click" 
+                        Margin="10,5" 
+                        IsEnabled="False"/>
+
+                </StackPanel>
+                <StackPanel Grid.Row="1" Grid.Column="1">
+                    <Button Content="Перевод" 
+                        Name="SendAccBtn"
+                        Height="30" Width="108" 
+                        Click="Send_Click" 
+                        Margin="10,5"                        
+                        IsEnabled="False"/>
+                    <Button Content="Пополнить" 
+                        Name="DepositAccBtn"
+                        Height="30" Width="108" 
+                        Click="Deposit_Click" 
+                        Margin="10,5"                        
+                        IsEnabled="False"/>
+                </StackPanel>
+
+            </Grid>
+
+        </Grid>
+
+    </Grid>
+</Window>

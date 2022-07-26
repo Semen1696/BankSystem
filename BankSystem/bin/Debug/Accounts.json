@@ -1,0 +1,50 @@
+[
+  {
+    "ClientId": 3,
+    "Number": "2DZIY0LSSI",
+    "Amount": 125.0,
+    "Createdate": "2022-01-19T18:19:47.8907538+03:00",
+    "AccountType": 0,
+    "Id": 3
+  },
+  {
+    "ClientId": 4,
+    "Number": "ZU5UZIMOI7",
+    "Amount": 235.0,
+    "Createdate": "2022-01-19T18:47:47.951071+03:00",
+    "AccountType": 0,
+    "Id": 4
+  },
+  {
+    "ClientId": 4,
+    "Number": "K0L6YQCYYC",
+    "Amount": 280.0,
+    "Createdate": "2022-07-20T18:46:59.6102775+03:00",
+    "AccountType": 1,
+    "Id": 6
+  },
+  {
+    "ClientId": 5,
+    "Number": "A4XLV0H3CK",
+    "Amount": 0.0,
+    "Createdate": "2022-07-20T18:49:04.6625305+03:00",
+    "AccountType": 0,
+    "Id": 7
+  },
+  {
+    "ClientId": 4,
+    "Number": "NTM1H18RQ9",
+    "Amount": 20.0,
+    "Createdate": "2022-07-21T11:46:35.1896044+03:00",
+    "AccountType": 0,
+    "Id": 8
+  },
+  {
+    "ClientId": 4,
+    "Number": "U3X9IQSJU6",
+    "Amount": 60.0,
+    "Createdate": "2022-07-21T11:46:50.7770404+03:00",
+    "AccountType": 0,
+    "Id": 9
+  }
+]
