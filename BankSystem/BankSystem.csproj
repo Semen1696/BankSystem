@@ -74,22 +74,9 @@
     <Compile Include="AddClientWindow.xaml.cs">
       <DependentUpon>AddClientWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="BankContext.cs" />
     <Compile Include="DepositWindow.xaml.cs">
       <DependentUpon>DepositWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Models\AccountType.cs" />
-    <Compile Include="Models\BankAccount.cs" />
-    <Compile Include="Models\BaseEntity.cs" />
-    <Compile Include="Models\Client.cs" />
-    <Compile Include="Models\ClientType.cs" />
-    <Compile Include="Repos\BankAccount.cs" />
-    <Compile Include="Repos\DepositAccount.cs" />
-    <Compile Include="Repos\IBankAccount.cs" />
-    <Compile Include="Models\Index.cs" />
-    <Compile Include="Repos\Account.cs" />
-    <Compile Include="Repos\ClientRepository.cs" />
-    <Compile Include="Repos\Repository.cs" />
     <Compile Include="SendDepositWindow.xaml.cs">
       <DependentUpon>SendDepositWindow.xaml</DependentUpon>
     </Compile>
@@ -148,6 +135,20 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Common\Common.csproj">
+      <Project>{e7f3b194-5590-441f-a110-826096189563}</Project>
+      <Name>Common</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Models\Models.csproj">
+      <Project>{cf6ddef3-4af2-4ab3-90f7-1952d5e86449}</Project>
+      <Name>Models</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Repository\Logic.csproj">
+      <Project>{684698a9-5db2-4f98-b854-3fdcefd97e0a}</Project>
+      <Name>Logic</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

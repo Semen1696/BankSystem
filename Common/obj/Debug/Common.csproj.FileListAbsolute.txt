@@ -1,0 +1,6 @@
+C:\Users\semen\source\repos\BankSystem\Common\bin\Debug\Common.dll
+C:\Users\semen\source\repos\BankSystem\Common\bin\Debug\Common.pdb
+C:\Users\semen\source\repos\BankSystem\Common\obj\Debug\Common.csproj.AssemblyReference.cache
+C:\Users\semen\source\repos\BankSystem\Common\obj\Debug\Common.csproj.CoreCompileInputs.cache
+C:\Users\semen\source\repos\BankSystem\Common\obj\Debug\Common.dll
+C:\Users\semen\source\repos\BankSystem\Common\obj\Debug\Common.pdb

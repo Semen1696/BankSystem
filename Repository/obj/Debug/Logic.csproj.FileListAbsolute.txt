@@ -1,0 +1,13 @@
+C:\Users\semen\source\repos\BankSystem\Repository\obj\Debug\Logic.csproj.AssemblyReference.cache
+C:\Users\semen\source\repos\BankSystem\Repository\obj\Debug\Logic.csproj.CoreCompileInputs.cache
+C:\Users\semen\source\repos\BankSystem\Repository\bin\Debug\Repository.dll
+C:\Users\semen\source\repos\BankSystem\Repository\bin\Debug\Repository.pdb
+C:\Users\semen\source\repos\BankSystem\Repository\bin\Debug\Common.dll
+C:\Users\semen\source\repos\BankSystem\Repository\bin\Debug\Models.dll
+C:\Users\semen\source\repos\BankSystem\Repository\bin\Debug\Newtonsoft.Json.dll
+C:\Users\semen\source\repos\BankSystem\Repository\bin\Debug\Common.pdb
+C:\Users\semen\source\repos\BankSystem\Repository\bin\Debug\Models.pdb
+C:\Users\semen\source\repos\BankSystem\Repository\bin\Debug\Newtonsoft.Json.xml
+C:\Users\semen\source\repos\BankSystem\Repository\obj\Debug\Logic.csproj.CopyComplete
+C:\Users\semen\source\repos\BankSystem\Repository\obj\Debug\Repository.dll
+C:\Users\semen\source\repos\BankSystem\Repository\obj\Debug\Repository.pdb

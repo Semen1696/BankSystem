@@ -1,18 +1,7 @@
-﻿using BankSystem.Models;
-using BankSystem.Repos;
+﻿using Logic;
+using Models;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
 
 namespace BankSystem
 {
@@ -27,7 +16,7 @@ namespace BankSystem
         public SendDepositWindow(ClientRepository clientRepository, BankAccount bankAccount)
         {
             InitializeComponent();
-            _bankRepository = new BankAccount<Account>();
+            _bankRepository = new BankAccountProcess<Account>();
             _clientRepository = clientRepository;
             _bankAccount = bankAccount; 
         }

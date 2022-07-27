@@ -33,3 +33,9 @@ C:\Users\semen\source\repos\BankSystem\BankSystem\bin\Debug\Prism.Wpf.xml
 C:\Users\semen\source\repos\BankSystem\BankSystem\obj\Debug\AccountDialogWindow.g.cs
 C:\Users\semen\source\repos\BankSystem\BankSystem\obj\Debug\AccountDialogWindow.baml
 C:\Users\semen\source\repos\BankSystem\BankSystem\obj\Debug\BankSystem.csproj.CopyComplete
+C:\Users\semen\source\repos\BankSystem\BankSystem\bin\Debug\Common.dll
+C:\Users\semen\source\repos\BankSystem\BankSystem\bin\Debug\Models.dll
+C:\Users\semen\source\repos\BankSystem\BankSystem\bin\Debug\Repository.dll
+C:\Users\semen\source\repos\BankSystem\BankSystem\bin\Debug\Common.pdb
+C:\Users\semen\source\repos\BankSystem\BankSystem\bin\Debug\Models.pdb
+C:\Users\semen\source\repos\BankSystem\BankSystem\bin\Debug\Repository.pdb

@@ -1,5 +1,6 @@
-﻿using BankSystem.Models;
-using BankSystem.Repos;
+﻿using Common;
+using Logic;
+using Models;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -70,7 +71,7 @@ namespace BankSystem
             {
                 return;
             }
-            bankAccount = new BankAccount<Account>();
+            bankAccount = new BankAccountProcess<Account>();
             selectedAccounts = bankAccount.GetAccountsByClientId(selectedClient.Id);
             PhisicalAccountTable.ItemsSource = selectedAccounts;
             DeleteBtn.Visibility = Visibility.Visible;
@@ -119,10 +120,10 @@ namespace BankSystem
                 switch (result)
                 {
                     case "Sample":
-                        bankAccount = new BankAccount<Account>();
+                        bankAccount = new BankAccountProcess<Account>();
                         break;
                     case "Deposit":
-                        bankAccount = new BankAccount<DepositAccount>();
+                        bankAccount = new BankAccountProcess<DepositAccount>();
                         break;
                     default:
                         break;
@@ -136,7 +137,7 @@ namespace BankSystem
 
         private void DelAcc_Click(object sender, RoutedEventArgs e)
         {
-            bankAccount = new BankAccount<Account>();
+            bankAccount = new BankAccountProcess<Account>();
             bankAccount.RemoveAccount(selectedAccount);
             selectedAccounts.Remove(selectedAccount);
             DeleteAccBtn.IsEnabled = false;

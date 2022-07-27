@@ -1,19 +1,11 @@
-﻿using BankSystem.Models;
-using BankSystem.Repos;
+﻿using Common;
+using Logic;
+using Models;
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
+
 
 namespace BankSystem
 {
@@ -32,10 +24,13 @@ namespace BankSystem
         private void Button_Click(object sender, RoutedEventArgs e)
         {
 
-            var result = CheckInput();
-            if(result.Count != 0)
+            try
             {
-                MessageBox.Show(string.Join("\n", result), "Предупреждение", MessageBoxButton.OK, MessageBoxImage.Warning);
+                CheckInput();
+            }
+            catch(ValidateException ex)
+            {
+                MessageBox.Show(ex.Message, "Предупреждение", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
             Client client = new Client
@@ -67,26 +62,25 @@ namespace BankSystem
             Close();
         }
 
-        private List<string> CheckInput()
+        private void CheckInput()
         {
             List<string> errors = new List<string>();
             if (!txtboxName.Text.Any(c => char.IsLetter(c)))
             {
-                errors.Add("Неверный формат имени");
+                throw new ValidateException("Неверный формат имени");
             }
             if (!txtboxSurname.Text.Any(c => char.IsLetter(c)))
             {
-                errors.Add("Неверный формат фамилии");
+                throw new ValidateException("Неверный формат фамилии");
             }
             if (!int.TryParse(txtboxAge.Text, out int res))
             {
-                errors.Add("Неверный формат возраста");
+                throw new ValidateException("Неверный формат возраста");
             }
             if (!int.TryParse(txtboxPhone.Text, out int res1))
             {
-                errors.Add("Неверный формат телефона");
+                throw new ValidateException("Неверный формат телефона");
             }
-            return errors;
         }
     }
 }
