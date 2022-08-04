@@ -2,6 +2,8 @@
 using Newtonsoft.Json;
 using System.Collections.ObjectModel;
 using System.IO;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace Logic
 {
@@ -24,7 +26,7 @@ namespace Logic
         /// </summary>
         /// <param name="item"></param>
         public void AddItem(T item)
-        {            
+        {
             _items.Add(item);
             WriteDataToFile();
         }
@@ -36,7 +38,7 @@ namespace Logic
         {
             _items.Remove(item);
             WriteDataToFile();
-    
+
         }
 
         /// <summary>
@@ -55,13 +57,13 @@ namespace Logic
         {
             WriteDataToFile();
         }
-  
+
         /// <summary>
         /// Получить все данные из файла
         /// </summary>
         /// <returns></returns>
         public ObservableCollection<T> GetAllData()
-        {
+        {       
             string json = CreateOrRead(_path);
             ObservableCollection<T> items = JsonConvert.DeserializeObject<ObservableCollection<T>>(json);
             if (items == null)
@@ -83,11 +85,11 @@ namespace Logic
             switch (t.Name)
             {
                 case "Client":
-                    ind.ClientId = ind.ClientId + 1;
+                    ind.ClientId++;
                     Id = ind.ClientId;
                     break;
                 case "BankAccount":
-                    ind.AccountId = ind.AccountId + 1;
+                    ind.AccountId++;
                     Id = ind.AccountId;
                     break;
             }
@@ -95,16 +97,16 @@ namespace Logic
             return Id;
 
         }
-        
+
         /// <summary>
         /// запись данных в файл
         /// </summary>
-        private void WriteDataToFile()
+        private async Task WriteDataToFile()
         {
             string json = JsonConvert.SerializeObject(_items, Formatting.Indented);
             using (StreamWriter sw = new StreamWriter(_path, false, System.Text.Encoding.Default))
             {
-                sw.WriteLine(json);
+                await sw.WriteLineAsync(json);
             }
         }
 
@@ -113,16 +115,20 @@ namespace Logic
         /// </summary>
         /// <param name="path"></param>
         /// <returns></returns>
-        private string CreateOrRead(string path)
+        private static string CreateOrRead(string path)
         {
             string json = string.Empty;
-            if (!File.Exists(path))
+            try
+            {
+                using (StreamReader reader = File.OpenText(path))
+                {
+                    var json1 = reader.ReadToEndAsync().Result;
+                    return json1;
+                }
+            }
+            catch (FileNotFoundException)
             {
                 File.Create(path);
-            }
-            else
-            {
-                json = File.ReadAllText(path);
             }
 
             return json;
