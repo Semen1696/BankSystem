@@ -22,5 +22,29 @@
     "Phone": "325235",
     "ClientTypeId": 0,
     "Id": 7
+  },
+  {
+    "Name": "sdfsdfg",
+    "Surname": "sdgwswg",
+    "Age": 345,
+    "Phone": "4352364",
+    "ClientTypeId": 1,
+    "Id": 8
+  },
+  {
+    "Name": "sdfws",
+    "Surname": "werw",
+    "Age": 342,
+    "Phone": "2342412",
+    "ClientTypeId": 1,
+    "Id": 9
+  },
+  {
+    "Name": "asdfas",
+    "Surname": "sdfsef",
+    "Age": 546,
+    "Phone": "456",
+    "ClientTypeId": 1,
+    "Id": 10
   }
 ]

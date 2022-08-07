@@ -14,53 +14,48 @@ namespace BankSystem
     /// </summary>
     public partial class AddClientWindow : Window
     {
-        private readonly ClientRepository clientRepository;
-        public AddClientWindow(ClientRepository client)
+        private AddClientWindow() { InitializeComponent(); }
+        public AddClientWindow(ClientRepository repos) : this()
         {
-            InitializeComponent();
-            clientRepository = client;
-        }
-
-        private void Button_Click(object sender, RoutedEventArgs e)
-        {
-
-            try
+            
+            AddBtn.Click += delegate
             {
-                CheckInput();
-            }
-            catch(ValidateException ex)
-            {
-                MessageBox.Show(ex.Message, "Предупреждение", MessageBoxButton.OK, MessageBoxImage.Warning);
-                return;
-            }
-            Client client = new Client
-            {
-                Name = txtboxName.Text,
-                Surname = txtboxSurname.Text,
-                Age = Convert.ToInt32(txtboxAge.Text),
-                Phone = txtboxPhone.Text,
+                try
+                {
+                    CheckInput();
+                }
+                catch (ValidateException ex)
+                {
+                    MessageBox.Show(ex.Message, "Предупреждение", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
+                Client client = new Client
+                {
+                    Name = txtboxName.Text,
+                    Surname = txtboxSurname.Text,
+                    Age = Convert.ToInt32(txtboxAge.Text),
+                    Phone = txtboxPhone.Text,
+                };
+                string type = ClientTypeList.Text;
+                switch (type)
+                {
+                    case "Физ. лицо":
+                        client.ClientType = ClientType.Phisical;
+                        break;
+                    case "Вип клиент":
+                        client.ClientType = ClientType.Vip;
+                        break;
+                    case "Юр. лицо":
+                        client.ClientType = ClientType.Legal;
+                        break;
+                    default:
+                        break;
+                }
+                repos.AddClient(client);
+                DialogResult = true;
             };
-            string type = ClientTypeList.Text;
-            switch (type)
-            {
-                case "Физ. лицо":
-                    client.ClientType = ClientType.Phisical;
-                    break;
-                case "Вип клиент":
-                    client.ClientType = ClientType.Vip;
-                    break;
-                case "Юр. лицо":
-                    client.ClientType = ClientType.Legal;
-                    break;
-                default:
-                    break;
-            }
-            clientRepository.AddClient(client);
-
-
-
-            Close();
         }
+      
 
         private void CheckInput()
         {

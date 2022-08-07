@@ -1,7 +1,10 @@
-﻿using Models;
+﻿using Common;
+using Models;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Data;
+using System.Data.SqlClient;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -12,60 +15,84 @@ namespace Logic
     /// <summary>
     /// Взаимодействие со счетом клиента
     /// </summary>
-    public class Account
+    public class Account : IBankAccount
     {
-        private readonly Repository<BankAccount> repository;
-        private readonly string accountPath = "Accounts.json";
 
         public delegate void AccountHandler(string message);
-        public event AccountHandler Notify;
+        public event AccountHandler NotifyEvent;
+        public event AccountHandler Notify
+        {
+            add
+            {
+                NotifyEvent += value;
+            }
+            remove
+            {
+                NotifyEvent += value;
+            }
+        }
+        protected SqlDataAdapter adapter;
 
         public Account()
         {
-            repository = new Repository<BankAccount>(accountPath);
+            PrepareAccount();
         }
         /// <summary>
         /// Создание счета
         /// </summary>
         /// <param name="client"></param>
         /// <returns></returns>
-        public virtual BankAccount CreateAccount(Client client)
+        public virtual void CreateAccount(Client client)
         {
-   
-            BankAccount bankAccount = new BankAccount
-            {
-                Number = RandomString(10),
-                ClientId = client.Id,
-                Amount = decimal.Zero,
-                Createdate = DateTime.Now,
-                AccountType = AccountType.Sample
-            };
-            bankAccount.Id = repository.LastId(bankAccount) + 1;
-            repository.AddItem(bankAccount);
-            Notify?.Invoke($"Открыт счет #{bankAccount.Number} на имя {client.Name}");
-            return bankAccount;
-            
+
+            DataRow r = BankContext.AccountTable.NewRow();
+            r["Number"] = RandomString(10);
+            r["Amount"] = decimal.Zero;
+            r["CreateDate"] = DateTime.Now;
+            r["AccountType"] = (int)AccountType.Sample;
+            r["ClientId"] = client.Id;
+
+            BankContext.AccountTable.Rows.Add(r);
+            SaveAccount();
+
+            NotifyEvent?.Invoke($"Открыт счет #{r["Number"]} на имя {client.Name}");
+
         }
 
         /// <summary>
         /// Удаление счета
         /// </summary>
         /// <param name="bankAccount"></param>
-        public virtual void RemoveAccount(BankAccount bankAccount)
+        public virtual void RemoveAccount(int id)
         {
-            repository.RemoveItem(bankAccount);
-            Notify?.Invoke($"Закрыт счет #{bankAccount.Number}");
+            var rows = BankContext.AccountTable.Select($"Id = {id}");
+            if (rows.Length > 0)
+            {
+                NotifyEvent?.Invoke($"Закрыт счет #{rows[0]["Number"]}");
+                rows[0].Delete();
+                SaveAccount();
+                
+            }
+
         }
         /// <summary>
         /// Пополнеие счета
         /// </summary>
         /// <param name="bankAccount"></param>
         /// <param name="sum"></param>
-        public void MakeDeposit(BankAccount bankAccount, decimal sum)
+        public void MakeDeposit(int accountId, decimal sum)
         {
-            bankAccount.Amount += sum;
-            Save();
-            Notify?.Invoke($"Счет {bankAccount.Number} пополнен на {sum}");
+            var rows = BankContext.AccountTable.Select($"Id = {accountId}");
+            if (rows.Length > 0)
+            {
+                var oldAmount = Convert.ToDecimal(rows[0]["Amount"]);
+                var newAmount = oldAmount + sum;
+                rows[0]["Amount"] = newAmount;
+                SaveAccount();
+
+                NotifyEvent?.Invoke($"Счет {rows[0]["Number"]} пополнен на {sum}");
+            }
+
         }
         /// <summary>
         /// Перевод между счетами
@@ -74,17 +101,31 @@ namespace Logic
         /// <param name="sum"></param>
         public void MakeTransfer(string accountNumberToTransfer, string accountNumberFromTransfer, decimal sum)
         {
-            GetAccountByNumber(accountNumberFromTransfer).Amount -= sum;
-            GetAccountByNumber(accountNumberToTransfer).Amount += sum;           
-            Save();
-            Notify?.Invoke($"Перевод {sum} со счета {accountNumberFromTransfer} на счет {accountNumberToTransfer}");
+            var rows = BankContext.AccountTable.Select($"Number = '{accountNumberFromTransfer}'");
+            if (rows.Length > 0)
+            {
+                var oldAmount = Convert.ToDecimal(rows[0]["Amount"]);
+                var newAmount = oldAmount - sum;
+                rows[0]["Amount"] = newAmount;
+            }
+
+            rows = BankContext.AccountTable.Select($"Number = '{accountNumberToTransfer}'");
+            if (rows.Length > 0)
+            {
+                var oldAmount = Convert.ToDecimal(rows[0]["Amount"]);
+                var newAmount = oldAmount + sum;
+                rows[0]["Amount"] = newAmount;
+            }
+
+            SaveAccount();
+            NotifyEvent?.Invoke($"Перевод {sum} со счета {accountNumberFromTransfer} на счет {accountNumberToTransfer}");
         }
         /// <summary>
         /// Сохранение изменений в файл 
         /// </summary>
-        public void Save()
+        public void SaveAccount()
         {
-            repository.SaveItem();
+            adapter.Update(BankContext.AccountTable);
         }
 
         /// <summary>
@@ -92,30 +133,27 @@ namespace Logic
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        public ObservableCollection<BankAccount> GetAccountsByClientId(int id)
+        public void FillAccountTableByClientId(int id)
         {
-            ObservableCollection<BankAccount> accounts = repository.GetItems();
-            ObservableCollection<BankAccount> selectedAccounts = new ObservableCollection<BankAccount>();
-            foreach (var item in accounts)
-            {
-                if(item.ClientId == id)
-                {
-                    selectedAccounts.Add(item);
-                }
-            }
-            return selectedAccounts;
-        }
+            BankContext.AccountTable = new DataTable();
 
-        /// <summary>
-        /// Получение счета по номеру счета
-        /// </summary>
-        /// <param name="number"></param>
-        /// <returns></returns>
-        public BankAccount GetAccountByNumber(string number)
+            string sql = $@"SELECT * FROM Accounts WHERE ClientId={id}";
+            adapter.SelectCommand = new SqlCommand(sql, BankContext.con);
+            adapter.Fill(BankContext.AccountTable);
+        }
+        public DataRow GetAccountByNumber(string number)
         {
-            ObservableCollection<BankAccount> accounts = repository.GetItems();
-            var account = accounts.FirstOrDefault(a => a.Number == number);
-            return account;
+            DataTable dt = new DataTable();
+            string sql = $@"SELECT * FROM Accounts WHERE Number='{number}'";
+            adapter.SelectCommand = new SqlCommand(sql, BankContext.con);
+            adapter.Fill(dt);
+            
+            
+            if (dt.Rows.Count > 0)
+            {
+                return dt.Rows[0];
+            }
+            return null;
         }
 
         /// <summary>
@@ -129,6 +167,32 @@ namespace Logic
             string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
             return new string(Enumerable.Repeat(chars, length)
                 .Select(x => x[random.Next(x.Length)]).ToArray());
+        }
+
+        private void PrepareAccount()
+        {
+            adapter = new SqlDataAdapter
+            {
+                InsertCommand = new SqlCommand(SqlQueries.InsertAccont, BankContext.con),
+                UpdateCommand = new SqlCommand(SqlQueries.UpdateAccount, BankContext.con),
+                DeleteCommand = new SqlCommand(SqlQueries.DeleteAccount, BankContext.con)
+            };
+
+            adapter.InsertCommand.Parameters.Add("@Id", SqlDbType.Int, 4, "Id").Direction = ParameterDirection.Output;
+            adapter.InsertCommand.Parameters.Add("@Number", SqlDbType.NVarChar, 10, "Number");
+            adapter.InsertCommand.Parameters.Add("@Amount", SqlDbType.Decimal, 20, "Amount");
+            adapter.InsertCommand.Parameters.Add("@CreateDate", SqlDbType.DateTime, 10, "CreateDate");
+            adapter.InsertCommand.Parameters.Add("@AccountType", SqlDbType.Int, 4, "AccountType");
+            adapter.InsertCommand.Parameters.Add("@ClientId", SqlDbType.Int, 4, "ClientId");
+
+            adapter.UpdateCommand.Parameters.Add("@Id", SqlDbType.Int, 4, "Id").SourceVersion = DataRowVersion.Original;
+            adapter.UpdateCommand.Parameters.Add("@Number", SqlDbType.NVarChar, 10, "Number");
+            adapter.UpdateCommand.Parameters.Add("@Amount", SqlDbType.Decimal, 20, "Amount");
+            adapter.UpdateCommand.Parameters.Add("@CreateDate", SqlDbType.DateTime, 10, "CreateDate");
+            adapter.UpdateCommand.Parameters.Add("@AccountType", SqlDbType.Int, 4, "AccountType");
+            adapter.UpdateCommand.Parameters.Add("@ClientId", SqlDbType.Int, 4, "ClientId");
+
+            adapter.DeleteCommand.Parameters.Add("@Id", SqlDbType.Int, 4, "Id");
         }
     }
 }

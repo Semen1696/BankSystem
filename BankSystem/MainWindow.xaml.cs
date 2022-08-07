@@ -5,6 +5,8 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Data;
+using System.Data.SqlClient;
 using System.IO;
 using System.Linq;
 using System.Windows;
@@ -20,12 +22,9 @@ namespace BankSystem
     {
 
         private ClientRepository clientRepository;
-        private ObservableCollection<Client> clients;
-        private ObservableCollection<BankAccount> selectedAccounts;
-        private IBankAccount<Account> bankAccount;
-        private Client selectedClient;
-        private BankAccount selectedAccount;
-        private Index index;
+        private IBankAccount bankAccount;
+        DataRowView row;
+        DataRowView selectedAccount;
         public MainWindow()
         {
             InitializeComponent();
@@ -34,18 +33,11 @@ namespace BankSystem
         }
         private void Initialsettings()
         {
-            string indexPath = "Index.json";
-            
-            //bankRepository = new Account();
-            
-            index = JsonConvert.DeserializeObject<Index>(CreateOrRead(indexPath));
-
-            if (index == null)
-            {
-                index = new Index { AccountId = 0, ClientId = 0 };
-                File.WriteAllText(indexPath, JsonConvert.SerializeObject(index));
-            }
+            BankContext.Connect();
+            clientRepository = new ClientRepository();
+            bankAccount = new Account();
             MainClientTypeList.SelectedIndex = 0;
+            bankAccount.Notify += BankContext.Log;
             clientRepository.Notify += BankContext.Log;
         }
 
@@ -55,25 +47,27 @@ namespace BankSystem
             {
                 Owner = this
             };
-            addClientWindow.Show();
+            addClientWindow.ShowDialog();
 
         }
 
         private void InfoTable_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
+            
             try
             {
-                selectedClient = (Client)PhisicalTable.SelectedItem;
-                if (selectedClient == null)
+                row = (DataRowView)PhisicalTable.SelectedItem;
+                if (row == null)
                     return;
             }
             catch
             {
                 return;
             }
-            bankAccount = new BankAccountProcess<Account>();
-            selectedAccounts = bankAccount.GetAccountsByClientId(selectedClient.Id);
-            PhisicalAccountTable.ItemsSource = selectedAccounts;
+
+           // bankAccount = new Account();
+            bankAccount.FillAccountTableByClientId(Convert.ToInt32(row["id"]));
+            PhisicalAccountTable.DataContext = BankContext.AccountTable.DefaultView;
             DeleteBtn.Visibility = Visibility.Visible;
             OpenAccBtn.IsEnabled = true;
             DeleteBtn.IsEnabled = true;
@@ -90,46 +84,31 @@ namespace BankSystem
             {
                 return;
             }
-            clientRepository.RemoveClient(selectedClient);
-            selectedAccounts.Clear();
-            clients.Remove(selectedClient);
+            clientRepository.RemoveClient(Convert.ToInt32(row["id"]));
 
             DeleteBtn.Visibility = Visibility.Hidden;
-        }
-        public string CreateOrRead(string path)
-        {
-            string json = string.Empty;
-            if (!File.Exists(path))
-            {
-                File.Create(path);
-            }
-            else
-            {
-                json = File.ReadAllText(path);
-            }
-
-            return json;
         }
 
         private void Bill_Click(object sender, RoutedEventArgs e)
         {
             AccountDialogWindow accountDialogWindow = new AccountDialogWindow();
-            if (accountDialogWindow.ShowDialog()==true)
+            if (accountDialogWindow.ShowDialog().Value)
             {
                 string result = accountDialogWindow.Result;
                 switch (result)
                 {
                     case "Sample":
-                        bankAccount = new BankAccountProcess<Account>();
+                        bankAccount = new Account();
                         break;
                     case "Deposit":
-                        bankAccount = new BankAccountProcess<DepositAccount>();
+                        bankAccount = new DepositAccount();
                         break;
                     default:
                         break;
                 }
-                var account = bankAccount.CreateAccount(selectedClient);
-                selectedAccounts.Add(account);
+                bankAccount.Notify += BankContext.Log;
+                Client client = clientRepository.GetClientById(Convert.ToInt32(row["id"]));
+                bankAccount.CreateAccount(client);
                 MessageBox.Show("Счет открыт");
             }
            
@@ -137,9 +116,7 @@ namespace BankSystem
 
         private void DelAcc_Click(object sender, RoutedEventArgs e)
         {
-            bankAccount = new BankAccountProcess<Account>();
-            bankAccount.RemoveAccount(selectedAccount);
-            selectedAccounts.Remove(selectedAccount);
+            bankAccount.RemoveAccount(Convert.ToInt32(selectedAccount["Id"]));
             DeleteAccBtn.IsEnabled = false;
             SendAccBtn.IsEnabled = false;
             DepositAccBtn.IsEnabled = false;
@@ -149,7 +126,7 @@ namespace BankSystem
         {
             try
             {
-                selectedAccount = (BankAccount)PhisicalAccountTable.SelectedItem;
+                selectedAccount = (DataRowView)PhisicalAccountTable.SelectedItem;
                 if (selectedAccount == null)
                     return;
             }
@@ -163,13 +140,13 @@ namespace BankSystem
 
         private void Send_Click(object sender, RoutedEventArgs e)
         {
-            
+
             SendDepositWindow sendDepositWindow = new SendDepositWindow
-                (clientRepository, selectedAccount)
+                (clientRepository, selectedAccount, bankAccount)
             {
                 Owner = this
             };
-            sendDepositWindow.ShowDialog();          
+            sendDepositWindow.ShowDialog();
             SendAccBtn.IsEnabled = false;
             DepositAccBtn.IsEnabled = false;
             DeleteAccBtn.IsEnabled = false;
@@ -183,7 +160,8 @@ namespace BankSystem
                 Owner = this
             };
             depositWindow.ShowDialog();
-            bankAccount.MakeDeposit(selectedAccount, depositWindow.Amount);
+
+            bankAccount.MakeDeposit(Convert.ToInt32(selectedAccount["Id"]), depositWindow.Amount);
             SendAccBtn.IsEnabled = false;
             DepositAccBtn.IsEnabled = false;
             DeleteAccBtn.IsEnabled = false;
@@ -205,54 +183,61 @@ namespace BankSystem
         {
             ComboBoxItem ComboItem = (ComboBoxItem)MainClientTypeList.SelectedItem;
             string name = ComboItem.Name;
-            string path = string.Empty;
+            string id = string.Empty;
             switch (name)
             {
                 case "Phisical":
-                    path = "Clients.json";
+                    id = "0";
                     break;
                 case "Vip":
-                    path = "VipClients.json";
+                    id = "1";
                     break;
                 case "Legal":
-                    path = "LegalClients.json";
+                    id = "2";
+                    break;
+                default:
                     break;
             }
-            clientRepository = new ClientRepository(path);
-            clients = clientRepository.GetAllClients();
-            PhisicalTable.ItemsSource = clients;
-            PhisicalAccountTable.ItemsSource = new ObservableCollection<BankAccount>();
+            BankContext.ClientTable = new DataTable();
+            SqlDataAdapter da = new SqlDataAdapter();
+            string sql = $@"SELECT * FROM Clients WHERE ClientTypeId={id}";
+            da.SelectCommand = new SqlCommand(sql, BankContext.con);
+            da.Fill(BankContext.ClientTable);
+
+            PhisicalTable.DataContext = BankContext.ClientTable.DefaultView;
+            
         }
 
         private void Save_Click(object sender, RoutedEventArgs e)
         {
-            var result = CheckInput(selectedClient);
+            var result = CheckInput(row);
             if (result.Count != 0)
             {
                 MessageBox.Show(string.Join("\n", result), "Предупреждение", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
+            row.EndEdit();
             clientRepository.SaveChanges();
             SaveBtn.IsEnabled = false;
             MessageBox.Show("Изменения сохранены!");
         }
-        private List<string> CheckInput(Client client)
+        private List<string> CheckInput(DataRowView client)
         {
             
             List<string> errors = new List<string>();
-            if (!client.Name.Any(c => char.IsLetter(c)))
+            if (!client["Name"].ToString().Any(c => char.IsLetter(c)))
             {
                 errors.Add("Неверный формат имени");
             }
-            if (!client.Surname.Any(c => char.IsLetter(c)))
+            if (!client["Surname"].ToString().Any(c => char.IsLetter(c)))
             {
                 errors.Add("Неверный формат фамилии");
             }
-            if (!Int32.TryParse(client.Age.ToString(), out int res))
+            if (!Int32.TryParse(client["Age"].ToString(), out int res))
             {
                 errors.Add("Неверный формат возраста");
             }
-            if (!Int32.TryParse(client.Phone.ToString(), out int res1))
+            if (!Int32.TryParse(client["Phone"].ToString(), out int res1))
             {
                 errors.Add("Неверный формат телефона");
             }
@@ -261,6 +246,7 @@ namespace BankSystem
 
         private void PhisicalTable_BeginningEdit(object sender, DataGridBeginningEditEventArgs e)
         {
+            row.BeginEdit();
             SaveBtn.IsEnabled = true;
         }
 
@@ -270,6 +256,13 @@ namespace BankSystem
             {
                 SaveBtn.IsEnabled = false;
             }
+            
+        }
+
+        private void PhisicalTable_CellEditEnding(object sender, DataGridCellEditEndingEventArgs e)
+        {
+            row.BeginEdit();
+            SaveBtn.IsEnabled = true;
         }
     }
 }

@@ -1,5 +1,7 @@
-﻿using Models;
+﻿using Common;
+using Models;
 using System;
+using System.Data;
 
 namespace Logic
 {
@@ -8,27 +10,22 @@ namespace Logic
     /// </summary>
     public class DepositAccount : Account
     {
-        private readonly Repository<BankAccount> repository;
-        private readonly string accountPath = "Accounts.json";
         public DepositAccount()
         {
-            repository = new Repository<BankAccount>(accountPath);
+            
         }
-        public override BankAccount CreateAccount(Client client)
+        public override void CreateAccount(Client client)
         {
-            
-            BankAccount bankAccount = new BankAccount
-            {
-                Number = RandomString(10),
-                ClientId = client.Id,
-                Amount = decimal.Zero,
-                Createdate = DateTime.Now,
-                AccountType = AccountType.Deposit
-            };
-            bankAccount.Id = repository.LastId(bankAccount) + 1;
-            repository.AddItem(bankAccount);
-            
-            return bankAccount;
+            DataRow r = BankContext.AccountTable.NewRow();
+            r["Number"] = RandomString(10);
+            r["Amount"] = decimal.Zero;
+            r["CreateDate"] = DateTime.Now;
+            r["AccountType"] = (int)AccountType.Deposit;
+            r["ClientId"] = client.Id;
+
+            BankContext.AccountTable.Rows.Add(r);
+            SaveAccount();
+
         }
     }
 }

@@ -38,7 +38,7 @@
                 </ComboBox>
             </StackPanel>
 
-            <Button Content="Добавить" Margin="10,10" Height="30" Click="Button_Click"/>
+            <Button x:Name="AddBtn" Content="Добавить" Margin="10,10" Height="30"/>
 
         </StackPanel>
     </Grid>

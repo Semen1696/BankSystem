@@ -1,16 +1,18 @@
 ﻿using Models;
-using System.Collections.ObjectModel;
+using System.Data;
+using static Logic.Account;
 
 namespace Logic
 {
-    public interface IBankAccount<out T>
+    public interface IBankAccount
     {
-        BankAccount CreateAccount(Client client);
-        void RemoveAccount(BankAccount bankAccount);
-        void MakeDeposit(BankAccount bankAccount, decimal sum);
+        void CreateAccount(Client client);
+        void RemoveAccount(int id);
+        void MakeDeposit(int accountId, decimal sum);
         void MakeTransfer(string accountNumberToTransfer, string accountNumberFromTransfer, decimal sum);
-        ObservableCollection<BankAccount> GetAccountsByClientId(int id);
-        BankAccount GetAccountByNumber(string number);
+        void FillAccountTableByClientId(int id);
         void SaveAccount();
+        DataRow GetAccountByNumber(string number);
+        event AccountHandler Notify;
     }
 }

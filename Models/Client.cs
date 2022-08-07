@@ -48,10 +48,10 @@ namespace Models
         /// </summary>
         public int ClientTypeId { get; set; }
         [JsonIgnore]
-        public ClientType ClientType 
+        public ClientType ClientType
         {
-            get { return (ClientType)this.ClientTypeId; }
-            set { this.ClientTypeId = (int)value; }
+            get => (ClientType)ClientTypeId;
+            set => ClientTypeId = (int)value;
         }
         /// <summary>
         /// Событие для динамеческого обновления данных в таблице

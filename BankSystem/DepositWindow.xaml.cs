@@ -12,12 +12,12 @@ namespace BankSystem
         public DepositWindow()
         {
             InitializeComponent();
+            DepositBtn.Click += delegate
+            {
+                Amount = Convert.ToDecimal(txtboxAmount.Text);
+                DialogResult = true;
+            };
         }
 
-        private void Button_Click(object sender, RoutedEventArgs e)
-        {
-            Amount = Convert.ToDecimal(txtboxAmount.Text);
-            DialogResult = true;
-        }
     }
 }

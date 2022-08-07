@@ -19,7 +19,9 @@
                 <TextBox x:Name="txtboxAmount" Height="25"/>
             </StackPanel>
             
-            <Button Content="Отправить" Margin="10,0" Height="30" Click="Button_Click"/>
+            <Button Content="Отправить" 
+                    Margin="10,0" Height="30" 
+                   x:Name="SendBtn"/>
 
         </StackPanel>
     </Grid>
